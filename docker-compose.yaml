@@ -2,9 +2,12 @@ version: '3.8'
 
 services:
   postgresql:
+    container_name: postgresql
     image: postgres:16.1
     ports:
       - 5432:5432
+    networks:
+      - default
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -16,16 +19,49 @@ services:
       retries: 5
 
   liquibase:
+    container_name: liquibase
     image: liquibase/liquibase:4.25
     depends_on:
       postgresql:
         condition: service_healthy
+    networks:
+      - default
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_URL: jdbc:postgresql://postgresql:5432/farel
 
     volumes:
-      - ./scripts:/liquibase/scripts
-      - ./scripts/liquibase/run-liquibase.sh:/liquibase/run-liquibase.sh
+      - ./db/scripts:/liquibase/scripts
+      - ./db/changelog:/liquibase/changelog
+      - ./db/liquibase/run-liquibase.sh:/liquibase/run-liquibase.sh
     command: /liquibase/run-liquibase.sh
+
+  auth_server:
+    container_name: auth_server
+    ports:
+      - 9000:9000
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    build:
+      context: ./auth-server
+      dockerfile: ./Dockerfile
+    networks:
+      - default
+    environment:
+      - SERVER_PORT= 9000
+      - DATASOURCE_URL=jdbc:postgresql://postgresql:5432/farel
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+
+
+
+networks:
+  default:
+    name: docker_network
+
+
+
+
+
