@@ -1,0 +1,171 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+
+    <!-- Create roles table -->
+    <changeSet id="createRolesTable" author="radkevich">
+        <createTable tableName="roles">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create persons table -->
+    <changeSet id="createPersonsTable" author="radkevich">
+        <createTable tableName="persons">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN"/>
+            <column name="mobile_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="INT">
+                <constraints foreignKeyName="fk_persons_roles" references="roles(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create users table -->
+    <changeSet id="createAdminsTable" author="radkevich">
+        <createTable tableName="admins">
+            <column name="id" type="INT">
+                <constraints foreignKeyName="fk_admins_persons" primaryKey="true" references="persons(id)"/>
+            </column>
+            <column name="superadmin" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create users table -->
+    <changeSet id="createUsersTable" author="radkevich">
+        <createTable tableName="users">
+            <column name="id" type="INT">
+                <constraints  foreignKeyName="fk_users_persons"  primaryKey="true" references="persons(id)"/>
+            </column>
+            <column name="vip" type="BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create courier_statuses table -->
+    <changeSet id="createCourierStatusesTable" author="radkevich">
+        <createTable tableName="courier_statuses">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create parcels table -->
+    <changeSet id="createParcelsTable" author="radkevich">
+        <createTable tableName="parcels">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="INT">
+                <constraints foreignKeyName="fk_parcels_users" references="users(id)"/>
+            </column>
+            <column name="item_name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create couriers table -->
+    <changeSet id="createCouriersTable" author="radkevich">
+        <createTable tableName="couriers">
+            <column name="id" type="SERIAL">
+                <constraints foreignKeyName="fk_couriers_persons" primaryKey="true" references="persons(id)"/>
+            </column>
+            <column name="courier_status_id" type="INT">
+                <constraints foreignKeyName="fk_couriers_courier_statuses" references="courier_statuses(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create order_statuses table -->
+    <changeSet id="createOrderStatusesTable" author="radkevich">
+        <createTable tableName="order_statuses">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create order_status_history table -->
+    <changeSet id="createOrderStatusHistoryTable" author="radkevich">
+        <createTable tableName="order_status_history">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="agent_id" type="INT">
+                <constraints foreignKeyName="fk_history_persons" references="persons(id)"/>
+            </column>
+            <column name="status_id" type="INT">
+                <constraints foreignKeyName="fk_history_order_statuses" references="order_statuses(id)"/>
+            </column>
+            <column name="change_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Create order_location table -->
+    <changeSet id="createOrderLocationTable" author="radkevich">
+        <createTable tableName="order_location">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="start_location" type="POINT"/>
+            <column name="finish_location" type="POINT"/>
+            <column name="current_location" type="POINT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create orders table -->
+    <changeSet id="createOrdersTable" author="radkevich">
+        <createTable tableName="orders">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parcel_id" type="INT">
+                <constraints foreignKeyName="fk_orders_parcels" references="parcels(id)"/>
+            </column>
+            <column name="courier_id" type="INT">
+                <constraints foreignKeyName="fk_orders_couriers" references="couriers(id)"/>
+            </column>
+            <column name="order_status_history_id" type="INT">
+                <constraints foreignKeyName="fk_orders_status_history" references="order_status_history(id)"/>
+            </column>
+            <column name="order_location_id" type="INT">
+                <constraints foreignKeyName="fk_orders_locations" references="order_location(id)"/>
+            </column>
+            <column name="created_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="TIMESTAMP"/>
+            <column name="finish_time" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+
+
+</databaseChangeLog>

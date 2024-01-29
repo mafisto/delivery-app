@@ -1,96 +1,63 @@
+-- Insert data into roles table
+INSERT INTO roles (role)
+VALUES ('admin'),
+       ('user'),
+       ('courier');
 
--- Insert sample data into roles table
-INSERT INTO roles (id, role)
-VALUES (1, 'admin');
-INSERT INTO roles (id, role)
-VALUES (2, 'user');
-INSERT INTO roles (id, role)
-VALUES (3, 'courier');
+-- Insert data into persons table
+INSERT INTO persons (username, password, email, active, mobile_number, role_id)
+VALUES ('admin1', 'password', 'admin1@example.com', true, '1234567890', 1),
+       ('user1', 'password', 'user1@example.com', true, '9876543210', 2),
+       ('courier1', 'password', 'courier1@example.com', true, '5555555555', 3),
+       ('courier2', 'password', 'courier2@example.com', true, '52352', 3);
 
--- Insert sample data into persons table
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('5418ee15-8396-400b-b5e3-a1658b2fe5a3', 'admin1', 'password', 'admin1_email@example.com', true, 11111, 1);
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('d8fbe36c-6976-49a3-a002-b511749501aa', 'admin2', 'password', 'admin2_email@example.com', true, 21313, 1);
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('b82d0d5b-4a36-4f35-90cd-0c18b9759d84', 'user1', 'password', 'user1_email@example.com', true, 4144, 2);
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('e19ade84-6284-4764-864b-97da84f62519', 'user2', 'password', 'user2_email@example.com', true, 121, 2);
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('19f98338-e654-47e3-9715-4d50c97c366b', 'courier1', 'password', 'courier1_email@example.com', true, 33333, 3);
-INSERT INTO persons (id, username, password, email, active, mobile_number, role_id)
-VALUES ('919c4093-d214-4e6d-82f3-d3722b2eff03', 'courier2', 'password', 'courier2_email@example.com', true, 44444, 3);
-
--- Insert sample data into admins table
+-- Insert data into admins table
 INSERT INTO admins (id, superadmin)
-VALUES ('5418ee15-8396-400b-b5e3-a1658b2fe5a3', true);
-INSERT INTO admins (id, superadmin)
-VALUES ('d8fbe36c-6976-49a3-a002-b511749501aa', false);
+VALUES (1, true);
 
-
--- Insert sample data into users table
+-- Insert data into users table
 INSERT INTO users (id, vip)
-VALUES ('b82d0d5b-4a36-4f35-90cd-0c18b9759d84', true);
-INSERT INTO users (id, vip)
-VALUES ('e19ade84-6284-4764-864b-97da84f62519', false);
+VALUES (2, false);
 
+-- Insert data into courier_statuses table
+INSERT INTO courier_statuses (status)
+VALUES ('Available'),
+       ('In Transit'),
+       ('Coffe Break');
 
-
--- Insert sample data into courier_statuses table
-INSERT INTO courier_statuses (id, status)
-VALUES (1, 'active');
-INSERT INTO courier_statuses (id, status)
-VALUES (2, 'inactive');
-
-
--- Insert sample data into couriers table
+-- Insert data into couriers table
 INSERT INTO couriers (id, courier_status_id)
-VALUES ('19f98338-e654-47e3-9715-4d50c97c366b', 1);
-INSERT INTO couriers (id, courier_status_id)
-VALUES ('919c4093-d214-4e6d-82f3-d3722b2eff03', 2);
+VALUES (3, 2),
+       (4, 2);
 
+-- Insert data into parcels table
+INSERT INTO parcels (user_id, item_name)
+VALUES (2, 'Electronics'),
+       (2, 'Clothing'),
+       (2, 'Food');
 
--- Insert sample data into parcels table
-INSERT INTO parcels (id, user_id, item_name)
-VALUES ('4894c278-2da5-4396-8991-edb05c899bc8', 'b82d0d5b-4a36-4f35-90cd-0c18b9759d84', 'milk');
-INSERT INTO parcels (id, user_id, item_name)
-VALUES ('50ec16d7-90a1-4b35-807f-268666e67e67', 'e19ade84-6284-4764-864b-97da84f62519', 'wood');
+-- Insert data into order_statuses table
+INSERT INTO order_statuses (status)
+VALUES ('Processing'),
+       ('In Transit'),
+       ('Delivered');
 
+-- Insert data into order_location table
+INSERT INTO order_location (start_location, finish_location, current_location)
+VALUES (POINT(40.7128, -74.0060), POINT(41.8781, -87.6298), POINT(40.7128, -74.0060)),
+       (POINT(34.0522, -118.2437), null, null),
+       (POINT(1, -12), POINT(34.0522, -118.2437), POINT(32, -114));
 
--- Insert sample data into order_statuses table
-INSERT INTO order_statuses (id, status)
-VALUES (1, 'assigned');
-INSERT INTO order_statuses (id, status)
-VALUES (2, 'in_progress');
-INSERT INTO order_statuses (id, status)
-VALUES (3, 'completed');
-INSERT INTO order_statuses (id, status)
-VALUES (4, 'cancelled');
+-- Insert data into order_status_history table
+INSERT INTO order_status_history (agent_id, status_id, change_time)
+VALUES (1, 1, '2024-01-29 12:30:00'),
+       (3, 2, '2024-01-29 14:00:00'),
+       (1, 3, '2024-01-29 15:00:00');
 
-
--- Insert sample data into orders table
-INSERT INTO orders (id, parcel_id, courier_id, created_time, start_time,
+-- Insert data into orders table
+INSERT INTO orders (parcel_id, courier_id, order_status_history_id, order_location_id, created_time, start_time,
                     finish_time)
-VALUES ('28028cd7-cff8-4d4a-811e-54a8f002db47', '4894c278-2da5-4396-8991-edb05c899bc8',
-        '19f98338-e654-47e3-9715-4d50c97c366b',
-        '2024-01-28 12:00:00', '2024-01-28 12:00:00', '2024-01-28 14:00:00');
-INSERT INTO orders (id, parcel_id, courier_id, created_time, start_time,finish_time)
-VALUES ('14a86268-84ab-4c6f-9e58-fa588c840eba', '4894c278-2da5-4396-8991-edb05c899bc8',
-        '19f98338-e654-47e3-9715-4d50c97c366b',
-        '2024-01-28 12:00:00',  '2024-01-28 12:00:00', '2024-01-28 14:00:00');
-
-
-
--- Insert sample data into order_location table
-INSERT INTO order_location (id, order_id, start_location, finish_location, coordinates, current_location)
-VALUES ('5516eeeb-20f0-4583-ac88-3c42848e2d41', '28028cd7-cff8-4d4a-811e-54a8f002db47', '(18,28)', '(28,34)', '{"(20,30)","(22,32)"}','(15,17)');
-INSERT INTO order_location (id, order_id, start_location, finish_location, coordinates, current_location)
-VALUES ('f329c4ab-fcdd-4263-ad93-4272f75b2f0a', '14a86268-84ab-4c6f-9e58-fa588c840eba', '(18,28)', '(28,34)', '{"(20,30)","(22,32)"}','(15,17)');
-
-
--- Insert sample data into order_status_history table
-INSERT INTO order_status_history (id, order_id, agent_id, status_id, change_time)
-VALUES ('aff63ae6-dd2a-4e3b-abf9-7df2a56f07ac', '28028cd7-cff8-4d4a-811e-54a8f002db47', '5418ee15-8396-400b-b5e3-a1658b2fe5a3', 1, '2024-01-28 12:00:00');
-INSERT INTO order_status_history (id, order_id, agent_id, status_id, change_time)
-VALUES ('1cdd286c-a5d4-4b08-8d7e-b5ebb03404f0', '14a86268-84ab-4c6f-9e58-fa588c840eba', 'e19ade84-6284-4764-864b-97da84f62519', 4, '2024-01-28 12:00:00');
+VALUES (1, 3, 1, 1, '2024-01-29 12:00:00', null, null),
+       (2, 4, 2, 2, '2024-01-29 13:30:00', null, null),
+       (3, 4, 3, 3, '2024-01-29 14:30:00', '2024-01-29 14:31:00', '2024-01-29 14:35:00');
 

@@ -1,0 +1,225 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+
+    <!-- Insert data into roles table -->
+    <changeSet id="insertRolesData" author="radkevich">
+        <insert tableName="roles">
+            <column name="role" value="admin"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="role" value="user"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="role" value="courier"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into persons table -->
+    <changeSet id="insertPersonsData" author="radkevich">
+        <insert tableName="persons">
+            <column name="username" value="admin1"/>
+            <column name="password" value="password"/>
+            <column name="email" value="admin1@example.com"/>
+            <column name="active" value="true"/>
+            <column name="mobile_number" value="1234567890"/>
+            <column name="role_id" value="1"/>
+        </insert>
+        <insert tableName="persons">
+            <column name="username" value="user1"/>
+            <column name="password" value="password"/>
+            <column name="email" value="user1@example.com"/>
+            <column name="active" value="true"/>
+            <column name="mobile_number" value="9876543210"/>
+            <column name="role_id" value="2"/>
+        </insert>
+        <insert tableName="persons">
+            <column name="username" value="courier1"/>
+            <column name="password" value="password"/>
+            <column name="email" value="courier1@example.com"/>
+            <column name="active" value="true"/>
+            <column name="mobile_number" value="5555555555"/>
+            <column name="role_id" value="3"/>
+        </insert>
+        <insert tableName="persons">
+            <column name="username" value="courier2"/>
+            <column name="password" value="password"/>
+            <column name="email" value="courier2@example.com"/>
+            <column name="active" value="true"/>
+            <column name="mobile_number" value="52352"/>
+            <column name="role_id" value="3"/>
+        </insert>
+        <insert tableName="persons">
+            <column name="username" value="courier3"/>
+            <column name="password" value="password"/>
+            <column name="email" value="courier3@example.com"/>
+            <column name="active" value="false"/>
+            <column name="mobile_number" value="52352"/>
+            <column name="role_id" value="3"/>
+        </insert>
+        <insert tableName="persons">
+            <column name="username" value="courier4"/>
+            <column name="password" value="password"/>
+            <column name="email" value="courier4@example.com"/>
+            <column name="active" value="false"/>
+            <column name="mobile_number" value="112321111"/>
+            <column name="role_id" value="3"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into admins table -->
+    <changeSet id="insertAdminsData" author="radkevich">
+        <insert tableName="admins">
+            <column name="id" value="1"/>
+            <column name="superadmin" value="true"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into users table -->
+    <changeSet id="insertUsersData" author="radkevich">
+        <insert tableName="users">
+            <column name="id" value="2"/>
+            <column name="vip" value="false"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into courier_statuses table -->
+    <changeSet id="insertCourierStatusesData" author="radkevich">
+        <insert tableName="courier_statuses">
+            <column name="status" value="Available"/>
+        </insert>
+        <insert tableName="courier_statuses">
+            <column name="status" value="In Transit"/>
+        </insert>
+        <insert tableName="courier_statuses">
+            <column name="status" value="Coffee Break"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into couriers table -->
+    <changeSet id="insertCouriersData" author="radkevich">
+        <insert tableName="couriers">
+            <column name="id" value="3"/>
+            <column name="courier_status_id" value="2"/>
+        </insert>
+        <insert tableName="couriers">
+            <column name="id" value="4"/>
+            <column name="courier_status_id" value="2"/>
+        </insert>
+        <insert tableName="couriers">
+            <column name="id" value="5"/>
+            <column name="courier_status_id" value="3"/>
+        </insert>
+        <insert tableName="couriers">
+            <column name="id" value="6"/>
+            <column name="courier_status_id" value="1"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into parcels table -->
+    <changeSet id="insertParcelsData" author="radkevich">
+        <insert tableName="parcels">
+            <column name="user_id" value="2"/>
+            <column name="item_name" value="Electronics"/>
+        </insert>
+        <insert tableName="parcels">
+            <column name="user_id" value="2"/>
+            <column name="item_name" value="Clothing"/>
+        </insert>
+        <insert tableName="parcels">
+            <column name="user_id" value="2"/>
+            <column name="item_name" value="Food"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into order_statuses table -->
+    <changeSet id="insertOrderStatusesData" author="radkevich">
+        <insert tableName="order_statuses">
+            <column name="status" value="Created"/>
+        </insert>
+        <insert tableName="order_statuses">
+            <column name="status" value="Processing"/>
+        </insert>
+        <insert tableName="order_statuses">
+            <column name="status" value="In Transit"/>
+        </insert>
+        <insert tableName="order_statuses">
+            <column name="status" value="Delivered"/>
+        </insert>
+        <insert tableName="order_statuses">
+            <column name="status" value="Cancelled"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into order_location table -->
+    <changeSet id="insertOrderLocationData" author="radkevich">
+        <insert tableName="order_location">
+            <column name="start_location" value="40.7128, -74.0060"/>
+            <column name="finish_location" value="41.8781, -87.6298"/>
+            <column name="current_location" value="40.7128, -74.0060"/>
+        </insert>
+        <insert tableName="order_location">
+            <column name="start_location" value="34.0522, -118.2437"/>
+            <column name="finish_location" value="null"/>
+            <column name="current_location" value="null"/>
+        </insert>
+        <insert tableName="order_location">
+            <column name="start_location" value="1, -12"/>
+            <column name="finish_location" value="34.0522, -118.2437"/>
+            <column name="current_location" value="32, -114"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into order_status_history table -->
+    <changeSet id="insertOrderStatusHistoryData" author="radkevich">
+        <insert tableName="order_status_history">
+            <column name="agent_id" value="1"/>
+            <column name="status_id" value="1"/>
+            <column name="change_time" value="2024-01-29 12:30:00"/>
+        </insert>
+        <insert tableName="order_status_history">
+            <column name="agent_id" value="3"/>
+            <column name="status_id" value="2"/>
+            <column name="change_time" value="2024-01-29 14:00:00"/>
+        </insert>
+        <insert tableName="order_status_history">
+            <column name="agent_id" value="1"/>
+            <column name="status_id" value="3"/>
+            <column name="change_time" value="2024-01-29 15:00:00"/>
+        </insert>
+    </changeSet>
+
+    <!-- Insert data into orders table -->
+    <changeSet id="insertOrdersData" author="radkevich">
+        <insert tableName="orders">
+            <column name="parcel_id" value="1"/>
+            <column name="courier_id" value="3"/>
+            <column name="order_status_history_id" value="1"/>
+            <column name="order_location_id" value="1"/>
+            <column name="created_time" value="2024-01-29 12:00:00"/>
+            <column name="start_time" value="null"/>
+            <column name="finish_time" value="null"/>
+        </insert>
+        <insert tableName="orders">
+            <column name="parcel_id" value="2"/>
+            <column name="courier_id" value="4"/>
+            <column name="order_status_history_id" value="2"/>
+            <column name="order_location_id" value="2"/>
+            <column name="created_time" value="2024-01-29 13:30:00"/>
+            <column name="start_time" value="null"/>
+            <column name="finish_time" value="null"/>
+        </insert>
+        <insert tableName="orders">
+            <column name="parcel_id" value="3"/>
+            <column name="courier_id" value="4"/>
+            <column name="order_status_history_id" value="3"/>
+            <column name="order_location_id" value="3"/>
+            <column name="created_time" value="2024-01-29 14:30:00"/>
+            <column name="start_time" value="2024-01-29 14:31:00"/>
+            <column name="finish_time" value="2024-01-29 14:35:00"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

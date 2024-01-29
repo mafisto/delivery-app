@@ -1,11 +1,7 @@
 #!/bin/bash
 
-LQ_USER=${POSTGRES_USER:-postgres}
-LQ_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-LQ_URL=${POSTGRES_URL:-jdbc:postgresql://postgresql:5432/farel}
+/liquibase/liquibase --driver=liquibase.ext.mongodb.database.MongoClientDriver --url=${MONGO_URL} --changeLogFile=./mongo/changelog/db.mongo.changelog-master.xml --username=${MONGO_USER} --password=${MONGO_PASSWORD}  update
+/liquibase/liquibase --driver=org.postgresql.Driver --url=${POSTGRES_URL} --changeLogFile=./postgres/changelog/db.postgres.changelog-master.xml --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} update
 
-/liquibase/liquibase --driver=org.postgresql.Driver --url=$LQ_URL --changeLogFile=./scripts/init.sql --username=$LQ_USER --password=$LQ_PASSWORD update
-/liquibase/liquibase --driver=org.postgresql.Driver --url=$LQ_URL --changeLogFile=./changelog/changelog-1.xml --username=$LQ_USER --password=$LQ_PASSWORD generate-changelog
-/liquibase/liquibase --driver=org.postgresql.Driver --url=$LQ_URL --changeLogFile=./scripts/data.sql --username=$LQ_USER --password=$LQ_PASSWORD update
-/liquibase/liquibase --driver=org.postgresql.Driver --url=$LQ_URL --changeLogFile=./changelog/changelog-2.xml --username=$LQ_USER --password=$LQ_PASSWORD generate-changelog
 
+#/liquibase/liquibase --driver=org.postgresql.Driver --url=$LQ_URL --changeLogFile=./changelog/db.changelog-master.xml --output-file=./changelog/generated-upgrade-script.sql --username=$LQ_USER --password=$LQ_PASSWORD updateSQL

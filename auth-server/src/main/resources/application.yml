@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT}
+
+logging:
+  appender: ${LOGGING_APPENDER}
+  root:
+    level: info
+  gelf:
+    url: ${LOGGING_APPENDER_URL}
+    port: ${LOGGING_APPENDER_PORT}
+
+spring:
+  application:
+    name: auth server
+  security:
+    oauth2:
+      authorizationserver:
+        issuer-url: ${JWT_ISSUER_URL}
+        introspection-endpoint: /oauth2/token-info
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:mongodb="http://www.liquibase.org/xml/ns/mongodb"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+         http://www.liquibase.org/xml/ns/mongodb
+         http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb-latest.xsd">
+
+    <!-- Changesets from the examples below go here -->
+
+    <changeSet id="1" author="radkevich">
+        <mongodb:createCollection collectionName="order_path">
+            <mongodb:options>
+                {
+                "validator":{
+                "$jsonSchema":{
+                "title":"Схема для хранения пройденного пути",
+                "bsonType":"object",
+                "required":[
+                "order_id",
+                "coordinates"
+                ],
+                "properties":{
+                "order_id":{
+                "bsonType":"string",
+                "description":"Идентификатор пути"
+                },
+                "coordinates":{
+                "type":"array",
+                "description":"Список координат",
+                "items":{
+                "bsonType":"array",
+                "minItems":2,
+                "maxItems":2,
+                "items":{
+                "bsonType":"double",
+                "description":"Координата X или Y"
+                }
+                }
+                }
+                }
+                }
+                },
+                "validationAction":"warn",
+                "validationLevel":"strict"
+                }
+            </mongodb:options>
+        </mongodb:createCollection>
+    </changeSet>
+
+    <changeSet id="2" author="radkevich">
+        <mongodb:createIndex collectionName="order_path">
+            <mongodb:keys>
+                { order_id: 1, type: 1}
+            </mongodb:keys>
+            <mongodb:options>
+                {unique: true, name: "ui_order_id"}
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+
+<!--    <changeSet  id="3" author="radkevich" >-->
+<!--        <mongodb:runCommand>-->
+<!--            <mongodb:command>-->
+<!--                {-->
+<!--                createRole: "readRole",-->
+<!--                roles: [-->
+<!--                "read"-->
+<!--                ],-->
+<!--                privileges: []-->
+<!--                }-->
+<!--            </mongodb:command>-->
+<!--        </mongodb:runCommand>-->
+<!--        <mongodb:runCommand>-->
+<!--            <mongodb:command>-->
+<!--                {-->
+<!--                createUser: "graylog",-->
+<!--                pwd: "secret",-->
+<!--                roles: [-->
+<!--                role: "dbOwner", db: "graylog"-->
+<!--                ]-->
+<!--                }-->
+<!--            </mongodb:command>-->
+<!--        </mongodb:runCommand>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet  id="3" author="radkevich" >-->
+<!--        <mongodb:runCommand>-->
+<!--            <mongodb:command>-->
+<!--                {-->
+<!--                    db = db.getSiblingDB('graylog');-->
+<!--                    db.createUser(-->
+<!--                        {-->
+<!--                            user: "graylog",-->
+<!--                            pwd: "secret",-->
+<!--                            roles: [-->
+<!--                                { role: "dbOwner", db: "graylog" }-->
+<!--                            ]-->
+<!--                        }-->
+<!--                    );-->
+<!--                }-->
+<!--            </mongodb:command>-->
+<!--        </mongodb:runCommand>-->
+<!--    </changeSet>-->
+
+
+<!--    <changeSet  id="3" author="radkevich" >-->
+<!--        <mongodb:script>-->
+<!--            <![CDATA[-->
+<!--                db = db.getSiblingDB('graylog');-->
+<!--                db.createUser(-->
+<!--                    {-->
+<!--                        user: "graylog",-->
+<!--                        pwd: "secret",-->
+<!--                        roles: [-->
+<!--                            { role: "dbOwner", db: "graylog" }-->
+<!--                        ]-->
+<!--                    }-->
+<!--                );-->
+<!--                graylog.test.insert({"hi":1})-->
+
+<!--            ]]>-->
+<!--        </mongodb:script>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>

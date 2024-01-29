@@ -1,0 +1,76 @@
+server:
+  port: 8081
+
+logging:
+  appender: stdout
+  root:
+    level: info
+  gelf:
+    url:
+    port:
+
+
+spring:
+  application:
+    name: user service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/farel
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: "order-1"
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+    admin:
+      auto-create: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: farel
+      username: mongodb
+      password: mongodb
+      authentication-database: admin
+
+retry:
+  max-attempts: 3
+  max-delay: 100
+
+kafka:
+  topics:
+    order-create: t.order.create
+    order-change-destination: t.order.change.destination
+    order-cancel: t.order.cancel
+    order-change-status: t.order.change.status
+    order-assign-courier: t.order.assign.courier
+    order-create-courier: t.order.create.courier
+    order-change-location: t.order.change.location
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

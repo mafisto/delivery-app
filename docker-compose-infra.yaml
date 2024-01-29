@@ -1,0 +1,223 @@
+version: '3.8'
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:16.1
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: farel
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:7.0.5
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_DATABASE=farel
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+    command: mongod --quiet --logpath /dev/null; --port 27017
+    volumes:
+      - ./db/mongo/graylog/graylog-init.js:/docker-entrypoint-initdb.d/graylog-init.js
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/farel --quiet
+      interval: 10s
+      timeout: 15s
+      retries: 10
+      start_period: 10s
+
+  redis:
+    container_name: redis
+    restart: unless-stopped
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    image: 'redis'
+    ports:
+      - "6379:6379"
+
+  liquibase:
+    container_name: liquibase
+    build:
+      dockerfile: ./db/Dockerfile
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_URL: jdbc:postgresql://postgresql:5432/farel
+      MONGO_USER: mongodb
+      MONGO_PASSWORD: mongodb
+      MONGO_URL: mongodb://mongodb:27017/farel?authSource=admin
+    command: /liquibase/run-liquibase.sh
+
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper
+    restart: unless-stopped
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+
+
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_started
+    ports:
+      - 29092:29092
+      - 9092:9092
+    environment:
+
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:PLAINTEXT,DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: DOCKER_INTERNAL://:9092,DOCKER_EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: DOCKER_INTERNAL://:9092,DOCKER_EXTERNAL://:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
+
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "29092" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    container_name: kafdrop
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_started
+    ports:
+      - "9100:9000"
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./metrics/config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./metrics/config/volume/prometheus:/prometheus
+
+
+  grafana:
+    image:  grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      prometheus:
+        condition: service_started
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./metrics/config/grafana/provisioning:/etc/grafana/provisioning
+      - ./metrics/config/volume/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: unless-stopped
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf/conf.d:/etc/nginx/conf.d
+
+
+  # Elasticsearch:
+  elasticsearch:
+    container_name: elasticsearch
+    restart: unless-stopped
+    image: elasticsearch:7.10.1
+    depends_on:
+      liquibase:
+        condition: service_completed_successfully
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Dlog4j2.formatMsgNoLookups=true -Xms512m -Xmx512m"
+
+  # Graylog:
+  graylog:
+    container_name: graylog
+    restart: unless-stopped
+    image: graylog/graylog:5.0
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_started
+      liquibase:
+        condition: service_completed_successfully
+    entrypoint: /usr/bin/tini -- wait-for-it mongodb:27017 --  /docker-entrypoint.sh
+    ports:
+      # Graylog web interface and REST API
+      - 9000:9000
+      # Syslog TCP
+      - 1514:1514
+      # Syslog UDP
+      - 1514:1514/udp
+      # GELF TCP
+      - 12201:12201
+      # GELF UDP
+      - 12201:12201/udp
+    environment:
+      # CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=change_me_change_me
+      # Password: admin
+      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+#      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
+      - GRAYLOG_MONGODB_URI=mongodb://graylog:graylog@mongodb:27017/graylog
+      - GRAYLOG_HTTP_BIND_ADDRESS=graylog:9000
+      - GRAYLOG_SKIP_PREFLIGHT_CHECKS=true
+      - GRAYLOG_skip_preflight_checks=true
+      - GRAYLOG_disable_native_system_stats_collector=true
+      - GRAYLOG_DISABLE_NATIVE_SYSTEM_STATS_COLLECTOR=true
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200
